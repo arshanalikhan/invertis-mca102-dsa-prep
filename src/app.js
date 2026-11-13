@@ -128,6 +128,126 @@
     if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
   }
 
+  // ---- reading tools (as on the GATE CSE prep site): text size, focus mode, self-test
+  var SCALES = [["S", 0.92], ["M", 1], ["L", 1.12], ["XL", 1.25]];
+  var sizeBtn = $("#sizeBtn"), sizeLbl = $("#sizeLbl");
+  function curScale() { var v = parseFloat(load("mca102-scale", 1)); return isNaN(v) ? 1 : v; }
+  function paintScale() {
+    var v = curScale(), i = SCALES.findIndex(function (s) { return s[1] === v; });
+    root.style.setProperty("--reading-scale", v);
+    if (sizeLbl) sizeLbl.textContent = (SCALES[i] || SCALES[1])[0];
+  }
+  if (sizeBtn) sizeBtn.addEventListener("click", function () {
+    var i = SCALES.findIndex(function (s) { return s[1] === curScale(); });
+    save("mca102-scale", SCALES[(i + 1) % SCALES.length][1]); paintScale();
+  });
+  paintScale();
+
+  function toggleBtn(btn, key, cls) {
+    if (!btn) return;
+    function paintT() { var on = !!load(key, false); document.body.classList.toggle(cls, on); btn.setAttribute("aria-pressed", String(on)); }
+    btn.addEventListener("click", function () { save(key, !load(key, false)); paintT(); });
+    paintT();
+  }
+  toggleBtn($("#focusBtn"), "mca102-focus", "focus");
+  var testBtn = $("#testBtn");
+  if (testBtn && $(".qa")) { testBtn.hidden = false; toggleBtn(testBtn, "mca102-selftest", "selftest"); }
+  $$(".revealbtn").forEach(function (b) {
+    b.addEventListener("click", function () { b.closest(".qa").classList.add("shown"); });
+  });
+  if (location.hash) { var tq = document.getElementById(location.hash.slice(1)); if (tq && tq.classList.contains("qa")) tq.classList.add("shown"); }
+
+  // ---- "On this page" outline with scroll-spy
+  var otp = $("#otp");
+  if (otp) {
+    var heads = $$("main h2[id], main .qa[id]").filter(function (h) { return !h.closest(".shorts") || h.classList.contains("qa") === false; });
+    var items = [];
+    $$("main h2").forEach(function (h, i) { if (!h.id) h.id = "s-" + i; });
+    $$("main h2, main .qa.long, main .qa.problem").forEach(function (h) {
+      if (h.closest(".card") || h.closest(".hero")) return;
+      var isQ = h.classList.contains("qa");
+      var label = isQ ? ($(".q", h) || h).textContent.replace(/^Q\.\s*/, "") : h.childNodes[0].textContent;
+      items.push({ el: h, id: h.id, label: label.trim(), lvl: isQ ? 3 : 2 });
+    });
+    if (items.length >= 3) {
+      otp.innerHTML = "<p>On this page</p><ol>" + items.map(function (it) {
+        var t = it.label.length > 70 ? it.label.slice(0, 68) + "…" : it.label;
+        return '<li><a class="l' + it.lvl + '" href="#' + it.id + '">' + t.replace(/</g, "&lt;") + "</a></li>";
+      }).join("") + "</ol>";
+      document.body.classList.add("has-otp");
+      var links = $$("a", otp);
+      var spy = function () {
+        var y = 90, cur = 0;
+        items.forEach(function (it, i) { if (it.el.getBoundingClientRect().top < y + 40) cur = i; });
+        links.forEach(function (a, i) { a.classList.toggle("on", i === cur); });
+        var on = links[cur]; if (on && (on.offsetTop < otp.scrollTop || on.offsetTop > otp.scrollTop + otp.clientHeight - 30)) otp.scrollTop = on.offsetTop - 60;
+      };
+      window.addEventListener("scroll", spy, { passive: true }); spy();
+    }
+  }
+
+  // ---- site search in the header ("/" to focus)
+  var q = $("#q"), sres = $("#sres"), index = null, hits = [], sel = -1;
+  function getIndex() {
+    if (index) return Promise.resolve(index);
+    var src = $('script[src*="app.js"]').getAttribute("src").replace(/app\.js.*$/, "search.json");
+    return fetch(src).then(function (r) { return r.json(); }).then(function (d) { index = d; return d; });
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function mark(t, terms) {
+    var out = esc(t);
+    terms.forEach(function (w) { if (w.length > 1) out = out.replace(new RegExp("(" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "ig"), "<mark>$1</mark>"); });
+    return out;
+  }
+  function snippetOf(x, terms) {
+    if (!x) return "";
+    var lx = x.toLowerCase(), i = Math.max(0, lx.indexOf(terms[0]) - 50);
+    return (i ? "…" : "") + x.slice(i, i + 140) + "…";
+  }
+  function runSearch() {
+    var v = q.value.trim().toLowerCase();
+    if (v.length < 2) { sres.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
+    getIndex().then(function (ix) {
+      var terms = v.split(/\s+/);
+      hits = ix.map(function (d) {
+        var t = d.t.toLowerCase(), x = d.x.toLowerCase(), score = 0;
+        for (var k = 0; k < terms.length; k++) {
+          var w = terms[k];
+          if (t.indexOf(w) >= 0) score += 3; else if (x.indexOf(w) >= 0) score += 1; else return null;
+        }
+        if (d.k === "Page") score += 1;
+        if (d.k.indexOf("7 marks") >= 0) score += 0.5;
+        return { d: d, s: score };
+      }).filter(Boolean).sort(function (a, b) { return b.s - a.s; }).slice(0, 12);
+      sel = -1;
+      sres.innerHTML = hits.length ? hits.map(function (h, i) {
+        return '<a href="' + h.d.u + '" role="option" data-i="' + i + '"><small>' + esc(h.d.k) + "</small><b>" + mark(h.d.t, terms) + "</b>" +
+          (h.d.x ? "<span>" + mark(snippetOf(h.d.x, terms), terms) + "</span>" : "") + "</a>";
+      }).join("") : '<div class="none">No results for “' + esc(v) + '”</div>';
+      sres.hidden = false; q.setAttribute("aria-expanded", "true");
+    });
+  }
+  if (q) {
+    q.addEventListener("input", runSearch);
+    q.addEventListener("focus", function () { getIndex(); if (q.value.trim().length > 1) runSearch(); });
+    q.addEventListener("keydown", function (e) {
+      var as = $$("a", sres);
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault(); if (!as.length) return;
+        sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + as.length) % as.length;
+        as.forEach(function (a, i) { a.classList.toggle("on", i === sel); }); as[sel].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "Enter" && as.length) { location.href = as[Math.max(0, sel)].getAttribute("href"); }
+      else if (e.key === "Escape") { sres.hidden = true; q.blur(); }
+    });
+    document.addEventListener("click", function (e) { if (!e.target.closest(".search")) sres.hidden = true; });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "/" && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); }
+    });
+    window.addEventListener("hashchange", function () {
+      var t = document.getElementById(location.hash.slice(1)); if (t && t.classList.contains("qa")) t.classList.add("shown");
+    });
+  }
+
   // ---- tooltips for [data-tip] (heatmap cells, badges, ranking rows)
   var tip = $("#tip");
   function place(e) {

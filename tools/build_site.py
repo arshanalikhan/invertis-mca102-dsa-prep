@@ -119,6 +119,9 @@ ICONS = {
     "theme": '<path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/>',
     "star": '<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
     "up": '<path d="M12 19V5M5 12l7-7 7 7"/>',
+    "search": '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+    "eye": '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    "focus": '<path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/>',
 }
 
 
@@ -158,9 +161,9 @@ def shell(slug, title, body, desc, css_url, js_url, wide=False):
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%231f4fa3%27/%3E%3Ccircle cx=%2710%27 cy=%2711%27 r=%273%27 fill=%27%23fff%27/%3E%3Ccircle cx=%2722%27 cy=%2711%27 r=%273%27 fill=%27%23fff%27/%3E%3Ccircle cx=%2716%27 cy=%2722%27 r=%273%27 fill=%27%23fff%27/%3E%3Cpath d=%27M10 11L16 22L22 11%27 stroke=%27%23fff%27 stroke-width=%271.6%27 fill=%27none%27/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="{css_url}">
-<script>try {{ var t0 = localStorage.getItem("mca102-theme"); if (t0 === "light" || t0 === "dark") document.documentElement.setAttribute("data-theme", t0); }} catch (e) {{}}</script>
+<script>try {{ var t0 = localStorage.getItem("mca102-theme"); if (t0 === "light" || t0 === "dark") document.documentElement.setAttribute("data-theme", t0); var s0 = localStorage.getItem("mca102-scale"); if (s0) document.documentElement.style.setProperty("--reading-scale", s0); }} catch (e) {{}}</script>
 </head>
 <body data-page="{slug[:-5]}">
 <a class="skip" href="#main">Skip to content</a>
@@ -174,10 +177,17 @@ def shell(slug, title, body, desc, css_url, js_url, wide=False):
 </aside>
 <div class="scrim" id="scrim" hidden></div>
 <header class="topbar">
-  <button class="menubtn" id="menuBtn" type="button" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">{icon('menu')}</button>
+  <button class="ibtn menubtn" id="menuBtn" type="button" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">{icon('menu')}</button>
   <a class="brand" href="index.html"><span class="logo" aria-hidden="true">DS</span><span>MCA102 DSA Prep</span></a>
-  <button class="themebtn icon-only" type="button" aria-label="Switch theme">{icon('theme')}</button>
+  <div class="search" role="search">{icon('search')}<input id="q" type="search" placeholder="Search answers and past questions" autocomplete="off" spellcheck="false" aria-label="Search the site" aria-controls="sres" aria-expanded="false"><kbd aria-hidden="true">/</kbd><div class="sres" id="sres" role="listbox" hidden></div></div>
+  <div class="tools">
+    <button class="ibtn" id="testBtn" type="button" aria-pressed="false" hidden data-tip="Self-test: hide every answer until you click Show answer">{icon('eye')}<span class="lbl">Self-test</span></button>
+    <button class="ibtn hide-sm" id="sizeBtn" type="button" data-tip="Text size (S, M, L, XL)" aria-label="Change text size">Aa<span class="lbl" id="sizeLbl">M</span></button>
+    <button class="ibtn hide-sm" id="focusBtn" type="button" aria-pressed="false" data-tip="Focus mode: hide the side menus" aria-label="Focus mode">{icon('focus')}</button>
+    <button class="ibtn themebtn icon-only" type="button" aria-label="Switch theme">{icon('theme')}</button>
+  </div>
 </header>
+<aside class="otp" id="otp" aria-label="On this page"></aside>
 <main id="main" class="{'wide' if wide else ''}">
 {body}
 </main>
@@ -217,7 +227,7 @@ def entry_html(e, with_meta=True, anchor=True):
     done = "" if not with_meta or e["kind"] == "short" else f'<button class="donebtn" type="button" data-done="{e["id"]}" aria-pressed="false">Mark as revised</button>'
     cls = "qa " + e["kind"]
     return (f'<article class="{cls}"{idattr}>{meta}<h3 class="q"><a class="qlink" href="unit-{e["unit"]}.html#{e["id"]}">Q.</a> {esc(e["q"])}</h3>'
-            f'{asked_html}<div class="ans">{e["html"]}</div>{done}</article>')
+            f'{asked_html}<button class="revealbtn" type="button">Show answer</button><div class="ans">{e["html"]}</div>{done}</article>')
 
 
 def unit_page(u):
@@ -516,6 +526,22 @@ def write(rel, text):
     return f"{rel.replace(os.sep, '/')}?v={hashlib.sha1(text.encode()).hexdigest()[:10]}"
 
 
+def search_index(pages):
+    """Every answer, past question and page heading, for the header search box."""
+    import re as _re
+    plain = lambda md: _re.sub(r"\s+", " ", _re.sub(r"```.*?```|[*#`>|\\]", " ", md, flags=_re.S)).strip()
+    out = []
+    for e in DATA.entries.values():
+        kind = "2 marks" if e["kind"] == "short" else "7 marks"
+        out.append({"t": e["q"], "u": f"unit-{e['unit']}.html#{e['id']}", "k": f"Unit {ROMAN[e['unit']]} · {kind}", "x": plain(e["md"])[:600]})
+    for p in DATA.papers:
+        for q in p["qs"]:
+            out.append({"t": q["text"], "u": f"papers.html#{qref(p, q)}", "k": f"Past paper · {p['session']} {p['code']} Q{q['qno']}", "x": ""})
+    for slug, (title, _b, desc) in pages.items():
+        out.append({"t": title, "u": slug, "k": "Page", "x": desc})
+    return out
+
+
 DATA = None
 
 
@@ -541,6 +567,7 @@ def main():
         pages[f"unit-{u['n']}.html"] = (f"Unit {ROMAN[u['n']]}: {u['short']}", unit_page(u), f"MCA102 Unit {ROMAN[u['n']]} notes: {u['title']}. Long answers with diagrams and 2-mark answers.")
     for slug, (title, body, desc) in pages.items():
         write(slug, shell(slug, title, body, desc, css_url, js_url))
+    write("assets/search.json", json.dumps(search_index(pages), ensure_ascii=False, separators=(",", ":")))
     open(os.path.join(OUT, ".nojekyll"), "w").close()
     nfig = sum(e["figs"] for e in DATA.entries.values())
     print(f"site/: {len(pages)} pages, {len(DATA.entries)} answers, {nfig} diagrams, {sum(len(p['qs']) for p in DATA.papers)} past questions")
