@@ -1,0 +1,79 @@
+# Timed mock papers for MCA102, in the 70-mark CO-based pattern of the past papers:
+#   Section A 1a-1g: 7 short questions, 2 marks each, attempt all (14)
+#   Section B 2a-2e: attempt any 3, 7 marks each (21)
+#   Section C 3a-7b: attempt one part of each question, 7 marks each (35)
+#   Q3 = Unit I, Q4 = Unit II, Q5 = Units III/IV, Q6 = Unit V, Q7 = Unit VI.
+# Line format:  <qno> | <answer ids joined by +> | [question text; default = the answer's question]
+# @mock <slug> | <title> | <subtitle>
+
+@mock mock-1 | Mock paper 1 | Built from the most-repeated topics: the paper most likely to resemble yours
+1a | u1s-adt
+1b | u1s-bigo
+1c | u2s-tail
+1d | u2s-cq-dq
+1e | u3s-array-ll
+1f | u4s-complete
+1g | u6s-mst
+2a | u1-asymptotic
+2b | u2-postfix-eval
+2c | u4-construct
+2d | u5-quick-merge
+2e | u6-mst
+3a | u1-address
+3b | u1-sparse
+4a | u2-circular
+4b | u2-hanoi
+5a | u3-sll-ops
+5b | u4-threaded
+6a | u5-bst
+6b | u5-hash
+7a | u6-bfs-dfs
+7b | u6-dijkstra
+
+@mock mock-2 | Mock paper 2 | Second-tier topics plus the regulars: AVL, B-tree, heap sort, polynomials
+1a | u1s-ds
+1b | u1s-sparse
+1c | u2s-pushpop
+1d | u2s-pq
+1e | u3s-header
+1f | u4s-threaded
+1g | u5s-successor
+2a | u1-ds-types
+2b | u2-infix
+2c | u3-poly
+2d | u5-avl
+2e | u6-represent
+3a | u1-matmul
+3b | u1-asymptotic
+4a | u2-stack-impl
+4b | u2-queue-impl
+5a | u3-types
+5b | u4-bintree
+6a | u5-heap
+6b | u5-btree
+7a | u6-dijkstra
+7b | u6-bfs-dfs
+
+@mock mock-3 | Mock paper 3 | Covers what the first two left out: Huffman, searching, storage management, deque
+1a | u1s-algo
+1b | u1s-arrays
+1c | u2s-recursion
+1d | u2s-linearq
+1e | u4s-repr
+1f | u5s-selection
+1g | u6s-directed
+2a | u1-sparse
+2b | u2-deque-pq
+2c | u4-huffman
+2d | u5-search
+2e | u6-bfs-dfs
+3a | u1-ds-types
+3b | u1-address
+4a | u2-postfix-eval
+4b | u2-infix
+5a | u3-poly
+5b | u4-construct
+6a | u5-insertion
+6b | u5-storage
+7a | u6-represent
+7b | u6-mst

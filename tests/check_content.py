@@ -44,6 +44,31 @@ def check(D):
             for t in q["tags"]:
                 if t not in D.topics:
                     problems.append(f"{p['session']} {p['code']} Q{q['qno']}: unknown topic {t}")
+    want = [f"1{c}" for c in "abcdefg"] + [f"2{c}" for c in "abcde"] + [f"{n}{c}" for n in range(3, 8) for c in "ab"]
+    c_units = {"3": {1}, "4": {2}, "5": {3, 4}, "6": {5}, "7": {6}}
+    for m in D.mocks:
+        qnos = [q["qno"] for q in m["qs"]]
+        if qnos != want:
+            problems.append(f"mock {m['slug']}: question numbers {qnos} do not follow the 1a-1g, 2a-2e, 3a-7b pattern")
+        used = []
+        for q in m["qs"]:
+            for i in q["ids"]:
+                e = D.entries.get(i)
+                if not e:
+                    problems.append(f"mock {m['slug']} Q{q['qno']}: unknown answer id {i}")
+                    continue
+                used.append(i)
+                if q["qno"][0] == "1" and e["kind"] != "short":
+                    problems.append(f"mock {m['slug']} Q{q['qno']}: Section A needs a short answer, got {i}")
+                if q["qno"][0] != "1" and e["kind"] == "short":
+                    problems.append(f"mock {m['slug']} Q{q['qno']}: Sections B/C need a long answer, got {i}")
+                if q["qno"][0] in c_units and e["unit"] not in c_units[q["qno"][0]]:
+                    problems.append(f"mock {m['slug']} Q{q['qno']}: should come from unit(s) {sorted(c_units[q['qno'][0]])}, got unit {e['unit']}")
+        dup = {i for i in used if used.count(i) > 1}
+        if dup:
+            problems.append(f"mock {m['slug']}: answers used twice in one paper: {sorted(dup)}")
+        if len({D.entries[i]["unit"] for i in used if i in D.entries}) < 6:
+            problems.append(f"mock {m['slug']}: does not cover all six units")
     return problems
 
 

@@ -164,7 +164,7 @@
     var items = [];
     $$("main h2").forEach(function (h, i) { if (!h.id) h.id = "s-" + i; });
     $$("main h2, main .qa.long, main .qa.problem").forEach(function (h) {
-      if (h.closest(".card") || h.closest(".hero")) return;
+      if (h.closest(".card") || h.closest(".hero") || h.closest(".cbt")) return;
       var isQ = h.classList.contains("qa");
       var label = isQ ? ($(".q", h) || h).textContent.replace(/^Q\.\s*/, "") : h.childNodes[0].textContent;
       items.push({ el: h, id: h.id, label: label.trim(), lvl: isQ ? 3 : 2 });
@@ -246,6 +246,186 @@
     window.addEventListener("hashchange", function () {
       var t = document.getElementById(location.hash.slice(1)); if (t && t.classList.contains("qa")) t.classList.add("shown");
     });
+  }
+
+  // ---- self-test panel on unit pages mirrors the header button
+  $$(".sttoggle").forEach(function (b) {
+    function sync() { b.setAttribute("aria-pressed", String(document.body.classList.contains("selftest"))); }
+    b.addEventListener("click", function () { if (testBtn) testBtn.click(); sync(); });
+    if (testBtn) testBtn.addEventListener("click", sync);
+    sync();
+  });
+
+  // ---- "Your progress" panel under the outline (unit pages)
+  var prog = $(".unitprog");
+  if (otp && prog && document.body.classList.contains("has-otp")) {
+    var box = document.createElement("div");
+    box.className = "yp";
+    otp.appendChild(box);
+    var paintYP = function () {
+      var all = load("mca102-done", []), ids = (prog.getAttribute("data-ids") || "").split(",").filter(Boolean);
+      var mine = ids.filter(function (i) { return all.indexOf(i) >= 0; }).length;
+      var shown = $$(".qa.shown").length, test = document.body.classList.contains("selftest");
+      box.innerHTML = '<p>Your progress</p><div class="ypr"><b>Long answers revised</b><span>' + mine + " / " + ids.length + "</span></div>" +
+        '<div class="bar"><i style="width:' + (ids.length ? 100 * mine / ids.length : 0) + '%"></i></div>' +
+        (test ? '<div class="ypr"><b>Answers revealed</b><span>' + shown + " / " + $$(".qa").length + "</span></div>" : "") +
+        '<a href="mocks.html">Take a timed mock test →</a>';
+    };
+    document.addEventListener("click", function () { setTimeout(paintYP, 0); });
+    paintYP();
+  }
+
+  // ---- unit tab bar: highlight the section in view
+  var tabLinks = $$(".tabs a[href^='#']");
+  if (tabLinks.length) {
+    var tabSpy = function () {
+      var cur = tabLinks[0];
+      tabLinks.forEach(function (a) { var t = document.getElementById(a.getAttribute("href").slice(1)); if (t && t.getBoundingClientRect().top < 160) cur = a; });
+      tabLinks.forEach(function (a) { a.classList.toggle("on", a === cur); });
+    };
+    window.addEventListener("scroll", tabSpy, { passive: true }); tabSpy();
+  }
+
+  // ---- past papers: ?unit=N preselects the unit chip
+  var um = /[?&]unit=(\d)/.exec(location.search);
+  if (um) { var chip = $('.chip[data-f="' + um[1] + '"]'); if (chip) chip.click(); }
+
+  // ---- mock tests: CBT-style timed paper with palette, then self-marking
+  var cbt = $(".cbt");
+  if (cbt) mockTest(cbt);
+  $$(".mkcard").forEach(function (c) {
+    var st = load("mca102-mock-" + c.getAttribute("data-mock"), null), out = $(".mkstat", c);
+    if (!st) { out.textContent = "Not attempted yet"; return; }
+    if (st.submitted) out.textContent = "Last score: " + (st.score == null ? "submitted, marking pending" : st.score + " / 70");
+    else out.textContent = "In progress: resume";
+  });
+
+  function mockTest(cbt) {
+    var slug = cbt.getAttribute("data-mock"), KEY = "mca102-mock-" + slug, mins = +cbt.getAttribute("data-minutes");
+    var qs = $$(".mqq", cbt), S = load(KEY, null), timer = null;
+    var start = $(".mstart", cbt), exam = $(".mexam", cbt), result = $(".mresult", cbt);
+    function store() { save(KEY, S); }
+    function attempted(i) { return !!(S.paper[i] || (S.notes[i] || "").trim()); }
+    function fmt(ms) {
+      var s = Math.max(0, Math.round(ms / 1000));
+      return Math.floor(s / 3600) + ":" + String(Math.floor(s % 3600 / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    }
+    function show(view) { start.hidden = view !== "start"; exam.hidden = view !== "exam"; result.hidden = view !== "result"; }
+    function paintPalette() {
+      $$(".pq-btn", cbt).forEach(function (b) {
+        var i = +b.getAttribute("data-go"), st = S.status[i] || "nv";
+        if (attempted(i)) st = S.status[i] === "m" ? "am" : "a";
+        b.className = "pq-btn st-" + st + (i === S.cur ? " cur" : "");
+      });
+      var a = qs.filter(function (q, i) { return attempted(i); }).length, m = Object.keys(S.status).filter(function (k) { return S.status[k] === "m"; }).length;
+      $(".mcounts", cbt).textContent = a + " attempted · " + m + " for review · " + (qs.length - a) + " left";
+      var sec = qs[S.cur].getAttribute("data-sec");
+      $$(".mtab", cbt).forEach(function (t) { t.classList.toggle("on", t.getAttribute("data-sec") === sec); });
+    }
+    function go(i) {
+      i = Math.max(0, Math.min(qs.length - 1, i));
+      S.cur = i;
+      if (!S.status[i] || S.status[i] === "nv") S.status[i] = "na";
+      qs.forEach(function (q, k) { q.hidden = k !== i; });
+      var q = qs[i];
+      $("[data-paper]", q).checked = !!S.paper[i];
+      $(".mnotes", q).value = S.notes[i] || "";
+      store(); paintPalette();
+      if (!exam.hidden) window.scrollTo({ top: cbt.offsetTop - 70 });
+    }
+    function tickTimer() {
+      var el = $(".mtimer", cbt);
+      if (!S.deadline) { el.textContent = "Practice mode · no time limit"; return; }
+      var left = S.deadline - Date.now();
+      el.textContent = fmt(left) + " left";
+      el.classList.toggle("low", left < 15 * 60000);
+      if (left <= 0) { clearInterval(timer); submit(true); }
+    }
+    function begin(mode) {
+      S = { mode: mode, started: Date.now(), deadline: mode === "timed" ? Date.now() + mins * 60000 : null, cur: 0, status: {}, notes: {}, paper: {}, marks: {}, submitted: false, score: null };
+      store(); run();
+    }
+    function run() {
+      show("exam"); go(S.cur || 0); tickTimer();
+      clearInterval(timer); timer = setInterval(tickTimer, 1000);
+    }
+    function submit(auto) {
+      if (!auto) {
+        var left = qs.filter(function (q, i) { return !attempted(i); }).length;
+        if (!confirm("Submit the test?" + (left ? " " + left + " questions are not marked as attempted." : ""))) return;
+      }
+      clearInterval(timer);
+      S.submitted = true; S.finished = Date.now(); store();
+      renderResult(auto);
+    }
+    function score() {
+      var by = { A: [], B: [], C: {} }, tot;
+      qs.forEach(function (q, i) {
+        var sec = q.getAttribute("data-sec"), v = +(S.marks[i] || 0);
+        if (sec === "C") { var g = q.getAttribute("data-qno")[0]; by.C[g] = Math.max(by.C[g] || 0, v); }
+        else by[sec].push(v);
+      });
+      var A = by.A.reduce(function (a, b) { return a + b; }, 0);
+      var B = by.B.sort(function (a, b) { return b - a; }).slice(0, 3).reduce(function (a, b) { return a + b; }, 0);
+      var C = Object.keys(by.C).reduce(function (a, k) { return a + by.C[k]; }, 0);
+      tot = A + B + C;
+      return { A: A, B: B, C: C, total: tot };
+    }
+    function renderResult(auto) {
+      show("result");
+      var used = S.finished && S.started ? fmt(S.finished - S.started) : "";
+      var rows = qs.map(function (q, i) {
+        var max = +q.getAttribute("data-marks"), tpl = $('template[data-ans="' + i + '"]', cbt), opts = "";
+        for (var k = 0; k <= max; k++) opts += '<button type="button" class="mk-btn' + (+S.marks[i] === k && S.marks[i] != null ? " on" : "") + '" data-mq="' + i + '" data-mv="' + k + '">' + k + "</button>";
+        var notes = (S.notes[i] || "").trim();
+        return '<details class="mres' + (attempted(i) ? " att" : "") + '"><summary><span class="qno">' + q.getAttribute("data-qno") + "</span><span class=\"mrq\">" +
+          $(".mqtext", q).textContent + '</span><span class="mrs">' + (attempted(i) ? (S.marks[i] == null ? "mark it" : S.marks[i] + "/" + max) : "not attempted") + "</span></summary>" +
+          '<div class="mrbody">' + (notes ? '<div class="mynotes"><b>Your notes</b><p>' + notes.replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }).replace(/\n/g, "<br>") + "</p></div>" : "") +
+          '<div class="mkrow"><b>Your marks out of ' + max + ":</b> " + opts + "</div>" + (tpl ? tpl.innerHTML : "") + "</div></details>";
+      }).join("");
+      var sc = score(), marked = Object.keys(S.marks).length;
+      S.score = marked ? sc.total : null; store();
+      result.innerHTML = '<div class="card mscore"><h2 class="h3">' + (auto ? "Time is up: your test was submitted" : "Test submitted") + "</h2>" +
+        '<div class="stats"><div class="stat"><b>' + sc.total + ' <small>/ 70</small></b><span>self-marked score</span></div><div class="stat"><b>' + sc.A + ' <small>/ 14</small></b><span>Section A</span></div>' +
+        '<div class="stat"><b>' + sc.B + ' <small>/ 21</small></b><span>Section B (best 3)</span></div><div class="stat"><b>' + sc.C + ' <small>/ 35</small></b><span>Section C (better part of each)</span></div></div>' +
+        '<p class="muted sm">' + (used ? "Time used: " + used + " · " : "") + marked + " of " + qs.length + " questions marked. Open each question, compare your answer with the model answer and give yourself marks: the score updates as you go.</p>" +
+        '<div class="cta"><button class="btn" type="button" data-openall-r>Open all answers</button><button class="btn" type="button" data-retake>Retake this paper</button><a class="btn" href="mocks.html">All mock tests</a></div></div>' + rows;
+      $$(".mk-btn", result).forEach(function (b) {
+        b.addEventListener("click", function () {
+          var i = b.getAttribute("data-mq");
+          S.marks[i] = +b.getAttribute("data-mv"); store();
+          var open = $$("details.mres", result).map(function (d) { return d.open; }), y = window.scrollY;
+          renderResult(auto);
+          $$("details.mres", result).forEach(function (d, k) { d.open = open[k]; });
+          window.scrollTo(0, y);
+        });
+      });
+      $("[data-retake]", result).addEventListener("click", function () { if (confirm("Start this paper again? Your marks for this attempt will be cleared.")) { save(KEY, null); S = null; showStart(); window.scrollTo(0, 0); } });
+      $("[data-openall-r]", result).addEventListener("click", function () { var ds = $$("details.mres", result), o = ds.some(function (d) { return !d.open; }); ds.forEach(function (d) { d.open = o; }); });
+    }
+    function showStart() {
+      show("start");
+      var last = $(".mlast", cbt);
+      last.hidden = true;
+    }
+    $$("[data-start]", cbt).forEach(function (b) { b.addEventListener("click", function () { begin(b.getAttribute("data-start")); }); });
+    $("[data-next]", cbt).addEventListener("click", function () { if (S.status[S.cur] === "m" && !attempted(S.cur)) S.status[S.cur] = "na"; go(S.cur + 1); });
+    $("[data-prev]", cbt).addEventListener("click", function () { go(S.cur - 1); });
+    $("[data-review]", cbt).addEventListener("click", function () { S.status[S.cur] = "m"; go(S.cur + 1); });
+    $("[data-submit]", cbt).addEventListener("click", function () { submit(false); });
+    $$(".pq-btn", cbt).forEach(function (b) { b.addEventListener("click", function () { go(+b.getAttribute("data-go")); }); });
+    $$(".mtab", cbt).forEach(function (t) {
+      t.addEventListener("click", function () { var i = qs.findIndex(function (q) { return q.getAttribute("data-sec") === t.getAttribute("data-sec"); }); go(i); });
+    });
+    qs.forEach(function (q, i) {
+      $("[data-paper]", q).addEventListener("change", function (e) { S.paper[i] = e.target.checked; store(); paintPalette(); });
+      $(".mnotes", q).addEventListener("input", function (e) { S.notes[i] = e.target.value; store(); paintPalette(); });
+    });
+    if (S && S.submitted) renderResult(false);
+    else if (S) {
+      if (S.deadline && S.deadline <= Date.now()) submit(true);
+      else run();
+    } else showStart();
   }
 
   // ---- tooltips for [data-tip] (heatmap cells, badges, ranking rows)

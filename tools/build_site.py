@@ -34,7 +34,7 @@ class Data:
         self.papers = P.load_papers()
         self.stats = P.stats(self.papers, self.topics)
         self.units = C.load_units()
-        self.mocks = []
+        self.mocks = C.load_mocks()
         self.entries = {e["id"]: e for u in self.units for e in u["entries"]}
         self.main = [p for p in self.papers if p["kind"] == "main"]
         self.latest = self.papers[0]
@@ -103,11 +103,12 @@ def page_label(x):
 
 
 # ------------------------------------------------------------------ page shell
-NAV = [("index.html", "Home", "home"), ("analysis.html", "PYQ analysis", "chart"), ("papers.html", "Past papers", "file"),
-       None,
-       *[(f"unit-{n}.html", f"Unit {ROMAN[n]}", f"u{n}") for n in range(1, 7)],
-       None,
-       ("guide.html", "Answer-writing guide", "pen")]
+UNIT_SHORT = {1: "Algorithms & Arrays", 2: "Stacks, Recursion & Queues", 3: "Linked Lists", 4: "Trees",
+              5: "Search, Sort, Search Trees & Hashing", 6: "Graphs"}
+NAV = [("Start here", [("index.html", "Home", "home", ""), ("guide.html", "Answer-writing guide", "pen", "")]),
+       ("Analysis & practice", [("analysis.html", "PYQ analysis", "chart", ""), ("mocks.html", "Mock tests", "clock", "Timed"),
+                                ("papers.html", "Past papers", "file", "")]),
+       ("Units", [(f"unit-{n}.html", UNIT_SHORT[n], f"u{n}", "") for n in range(1, 7)])]
 ICONS = {
     "home": '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
     "chart": '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
@@ -133,13 +134,13 @@ def icon(name):
 
 def shell(slug, title, body, desc, css_url, js_url, wide=False):
     nav = []
-    for item in NAV:
-        if item is None:
-            nav.append('<hr>')
-            continue
-        href, label, ic = item
-        on = ' class="on" aria-current="page"' if href == slug else ""
-        nav.append(f'<a href="{href}"{on}>{icon(ic)}<span>{label}</span></a>')
+    cur = "mocks.html" if slug.startswith("mock-") else slug
+    for group, items in NAV:
+        nav.append(f'<p class="navh">{group}</p>')
+        for href, label, ic, badge in items:
+            on = ' class="on" aria-current="page"' if href == cur else ""
+            b = f'<em class="nbadge">{badge}</em>' if badge else ""
+            nav.append(f'<a href="{href}"{on}>{icon(ic)}<span>{label}</span>{b}</a>')
     nav = "".join(nav)
     full_title = "MCA102 DSA Prep" if slug == "index.html" else f"{title} · MCA102 DSA Prep"
     return f"""<!doctype html>
@@ -250,7 +251,11 @@ def unit_page(u):
   <p class="eyebrow">Unit {ROMAN[u['n']]} · MCA102 Advanced Data Structure and Algorithms</p>
   <h1>{esc(u['title'])}</h1>
   <div class="syl"><b>Syllabus:</b> {esc(u['syllabus'])}</div>
-  <div class="lede">{u['intro']}</div>
+  <nav class="tabs" aria-label="Sections of this unit">
+    <a href="#overview">Overview</a><a href="#long">Long answers <span>{len(longs)}</span></a>{f'<a href="#problems">Problems <span>{len(probs)}</span></a>' if probs else ''}<a href="#short">Short answers <span>{len(shorts)}</span></a><a href="papers.html?unit={u['n']}">Past questions <span>{sum(1 for p in DATA.papers for q in p['qs'] if DATA.topics.get(q['tags'][0], {}).get('unit') == u['n'])}</span></a>
+  </nav>
+  <div class="lede" id="overview">{u['intro']}</div>
+  <div class="stpanel"><button class="ibtn sttoggle" type="button" aria-pressed="false">{icon('eye')}<span class="lbl">Self-test</span></button><p>Hides every answer behind its question. Say or write the answer first, then reveal it and compare.</p></div>
   <div class="unitprog" data-ids="{ids}"><div class="bar"><i></i></div><span class="lbl">0 of {len(longs) + len(probs)} long answers revised</span></div>
   <div class="grid2">
     <section class="card">
@@ -276,7 +281,7 @@ def unit_page(u):
 
 def pager(n):
     prev = f'<a class="btn" href="unit-{n - 1}.html">← Unit {ROMAN[n - 1]}</a>' if n > 1 else '<span></span>'
-    nxt = f'<a class="btn primary" href="unit-{n + 1}.html">Unit {ROMAN[n + 1]} →</a>' if n < 6 else '<a class="btn primary" href="analysis.html">See the PYQ analysis →</a>'
+    nxt = f'<a class="btn primary" href="unit-{n + 1}.html">Unit {ROMAN[n + 1]} →</a>' if n < 6 else '<a class="btn primary" href="mocks.html">Take a timed mock test →</a>'
     return f'<nav class="pager">{prev}{nxt}</nav>'
 
 
@@ -344,6 +349,93 @@ def paper_page(m, solved=False):
   <div class="card tipcard"><b>How to use this paper:</b> set the timer, write your answers on paper first, then open each answer and compare. Long answers here are written the way AKTU examiners like them: headings, points, one labelled diagram, a table where it helps, and a conclusion, about 2–3 pages each.</div>
 </div>"""
     return body
+
+
+MOCK_RULES = {"A": "Attempt all questions in brief. 2 × 7 = 14", "B": "Attempt any three. 7 × 3 = 21",
+              "C": "Attempt any one part of each question. 7 × 5 = 35"}
+
+
+def mock_questions(m):
+    out = []
+    for q in m["qs"]:
+        ents = [DATA.entries[i] for i in q["ids"]]
+        sec = "A" if q["qno"][0] == "1" else "B" if q["qno"][0] == "2" else "C"
+        out.append({"qno": q["qno"], "sec": sec, "marks": 2 if sec == "A" else 7, "ents": ents,
+                    "text": q["text"] or " ".join(e["q"] for e in ents), "unit": ents[0]["unit"]})
+    return out
+
+
+def mock_page(m):
+    qs = mock_questions(m)
+    arts, tmpls = [], []
+    for i, q in enumerate(qs):
+        label = f'Q{q["qno"][0]}' + (f'({q["qno"][1]})' if q["qno"][0] in "12" else f' part ({q["qno"][1]})')
+        group = "" if q["sec"] != "C" else f'<p class="mrule">Q{q["qno"][0]}: attempt part (a) <b>or</b> part (b).</p>'
+        arts.append(f'<article class="mqq" data-i="{i}" data-qno="{q["qno"]}" data-sec="{q["sec"]}" data-marks="{q["marks"]}" hidden>'
+                    f'<p class="mqmeta"><b>{label}</b> · Section {q["sec"]} · {q["marks"]} marks · Unit {ROMAN[q["unit"]]}</p>{group}'
+                    f'<h2 class="mqtext">{esc(q["text"])}</h2>'
+                    f'<label class="mpaper"><input type="checkbox" data-paper> I have answered this on paper</label>'
+                    f'<textarea class="mnotes" rows="7" placeholder="Optional: type your answer or key points here. They are saved in this browser and shown next to the model answer after you submit."></textarea>'
+                    f'</article>')
+        parts = "".join((f'<p class="subq">Part: <b>{esc(e["q"])}</b></p>' if len(q["ents"]) > 1 else "") + f'<div class="ans">{e["html"]}</div>' for e in q["ents"])
+        links = " · ".join(f'<a href="unit-{e["unit"]}.html#{e["id"]}">open in Unit {ROMAN[e["unit"]]} notes</a>' for e in q["ents"])
+        tmpls.append(f'<template data-ans="{i}">{parts}<p class="sm muted">{links}</p></template>')
+    pal = []
+    for sec in "ABC":
+        btns = "".join(f'<button type="button" class="pq-btn st-nv" data-go="{i}" aria-label="Question {q["qno"]}">{q["qno"]}</button>' for i, q in enumerate(qs) if q["sec"] == sec)
+        pal.append(f'<p class="palh">Section {sec}</p><div class="palgrid">{btns}</div>')
+    tabs = "".join(f'<button type="button" class="mtab" data-sec="{s_}">Section {s_}</button>' for s_ in "ABC")
+    return f"""
+<div class="wrap page cbt" data-mock="{m['slug']}" data-minutes="180">
+  <p class="eyebrow">Timed mock test · 3 hours · 70 marks</p>
+  <h1>{esc(m['title'])}</h1>
+  <p class="lede">{esc(m['sub'])}.</p>
+  <section class="card mstart">
+    <h2 class="h3">Before you start</h2>
+    <div class="tbl"><table><thead><tr><th>Section</th><th>Questions</th><th>What to attempt</th><th>Marks</th></tr></thead><tbody>
+      <tr><td>A</td><td>1(a)–1(g), short</td><td>All seven</td><td>14</td></tr>
+      <tr><td>B</td><td>2(a)–2(e), long</td><td>Any three</td><td>21</td></tr>
+      <tr><td>C</td><td>Q3–Q7, parts (a) and (b)</td><td>One part of each question</td><td>35</td></tr>
+      <tr><td colspan="3"><b>Total</b> (Q3 = Unit I, Q4 = Unit II, Q5 = Units III/IV, Q6 = Unit V, Q7 = Unit VI)</td><td><b>70</b></td></tr></tbody></table></div>
+    <ul class="mhow">
+      <li>Write your answers <b>on paper</b>, as in the real exam. Tick “I have answered this on paper”, or type key points in the box: both count as attempted.</li>
+      <li>The palette shows each question's status: not visited, seen, attempted, marked for review.</li>
+      <li>When time runs out the test is submitted for you. Then each model answer opens beside your notes and you <b>mark yourself</b>: the score counts only the best three in Section B and the better part of each Section C question, as the examiner would.</li>
+      <li>Everything is saved in this browser, so you can close the tab and resume.</li>
+    </ul>
+    <div class="cta"><button class="btn primary big" type="button" data-start="timed">Start timed test (3 hours)</button><button class="btn big" type="button" data-start="practice">Practice without timer</button></div>
+    <div class="mlast" hidden></div>
+  </section>
+  <section class="mexam" hidden>
+    <div class="mbar"><div class="mtabs">{tabs}</div><span class="mtimer" aria-live="off"></span><button class="btn primary" type="button" data-submit>Submit test</button></div>
+    <div class="mbody">
+      <div class="mqarea">{''.join(arts)}
+        <div class="mctrl"><button class="btn" type="button" data-prev>← Previous</button><button class="btn" type="button" data-review>Mark for review &amp; next</button><button class="btn primary" type="button" data-next>Save &amp; next →</button></div>
+      </div>
+      <aside class="mpal card"><p class="mcounts"></p>{''.join(pal)}
+        <ul class="mlegend"><li><i class="st-nv"></i>Not visited</li><li><i class="st-na"></i>Seen, not attempted</li><li><i class="st-a"></i>Attempted</li><li><i class="st-m"></i>Marked for review</li></ul>
+      </aside>
+    </div>
+  </section>
+  <section class="mresult" hidden></section>
+  {''.join(tmpls)}
+</div>"""
+
+
+def mocks_index():
+    cards = []
+    for m in DATA.mocks:
+        units = sorted({e["unit"] for q in mock_questions(m) for e in q["ents"]})
+        cards.append(f'<a class="kit mkcard" href="{m["slug"]}.html" data-mock="{m["slug"]}"><span class="k">3 hours · 70 marks</span><h3>{esc(m["title"])}</h3><p>{esc(m["sub"])}</p>'
+                     f'<p class="sm muted">22 questions · Units {", ".join(ROMAN[u] for u in units)}</p><span class="mkstat sm"></span></a>')
+    return f"""
+<div class="wrap page">
+  <p class="eyebrow">Timed practice · CO-based 70-mark pattern</p>
+  <h1>Mock tests</h1>
+  <p class="lede">Three full papers in the pattern of the past university papers: 7 short questions, any 3 of 5 long questions, and one part from each of five unit-wise questions. Take one with the 3-hour timer, write on paper, then mark yourself against the model answers.</p>
+  <div class="kits">{''.join(cards)}</div>
+  <div class="card tipcard"><b>How to use them:</b> take Mock 1 a week before the exam, revise the answers you lost marks on, then take Mock 2 and Mock 3 closer to the day. Aim to finish with 10 minutes to spare for checking numericals and diagrams.</div>
+</div>"""
 
 
 def papers_page():
@@ -487,7 +579,7 @@ def home_page():
       <p class="eyebrow">Invertis University · MCA (2025-27 &amp; 2026-28) · Semester I · 4 credits</p>
       <h1>MCA102 Advanced Data Structure and Algorithms</h1>
       <p class="lede">Unit-wise notes for all six units, built from an analysis of {len(DATA.main)} past university papers on the same subject. Every long answer is written to score: <b>2–3 pages of theory with one labelled diagram</b>, a table and a conclusion, and every numerical is worked step by step.</p>
-      <div class="cta"><a class="btn primary big" href="unit-1.html">Start with Unit I</a><a class="btn big" href="analysis.html">See what repeats</a><a class="btn big" href="papers.html">Past papers</a></div>
+      <div class="cta"><a class="btn primary big" href="unit-1.html">Start with Unit I</a><a class="btn big" href="analysis.html">See what repeats</a><a class="btn big" href="mocks.html">Take a timed mock</a></div>
     </div>
     <div class="herofacts">
       <div><b>{nlong}</b><span>long answers</span></div>
@@ -512,6 +604,7 @@ def home_page():
     <div class="card"><h2 class="h3">Most expected long questions</h2><p class="muted sm">Highest-chance topic first, one question per topic. <a href="analysis.html#most-expected-long-questions">Full list →</a></p>{predicted(10)}</div>
     <div class="card"><h2 class="h3">About the past papers</h2><p>Invertis University does not publish its MCA102 question papers online. The closest public papers are <b>AKTU's MCA Data Structures</b> papers (BMC205, KCA205, RCA202, NMCA213): the same subject, almost the same units and the same CO-based Section A/B/C format. Every question was tagged to an MCA102 topic to find what repeats.</p>
       <a class="kit" href="papers.html"><span class="k">Papers</span><h3>{len(DATA.papers)} papers · {nq} questions</h3><p>Filter by unit and jump to the answer.</p></a>
+      <a class="kit" href="mocks.html"><span class="k">Timed</span><h3>Mock tests</h3><p>Three 70-mark papers with a 3-hour timer, a question palette, model answers and self-marking.</p></a>
       <a class="kit" href="guide.html"><span class="k">Guide</span><h3>How to write the answers</h3><p>Time plan, answer layout and which diagram to draw.</p></a>
     </div>
   </section>
@@ -563,6 +656,9 @@ def main():
         "papers.html": ("Past papers", papers_page(), "Past MCA Data Structures questions (2016-17 to 2024-25), tagged by MCA102 unit and linked to answers."),
         "guide.html": ("Answer-writing guide", guide_page(), "How to write 2-mark and 7-mark answers that score in the MCA102 data structures exam."),
     }
+    pages["mocks.html"] = ("Mock tests", mocks_index(), "Three timed 70-mark mock papers for MCA102 in the university pattern, with model answers and self-marking.")
+    for m in DATA.mocks:
+        pages[f"{m['slug']}.html"] = (m["title"], mock_page(m), f"MCA102 {m['title']}: a timed 3-hour, 70-mark test with model answers.")
     for u in DATA.units:
         pages[f"unit-{u['n']}.html"] = (f"Unit {ROMAN[u['n']]}: {u['short']}", unit_page(u), f"MCA102 Unit {ROMAN[u['n']]} notes: {u['title']}. Long answers with diagrams and 2-mark answers.")
     for slug, (title, body, desc) in pages.items():
