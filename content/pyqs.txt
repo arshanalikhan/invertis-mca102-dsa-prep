@@ -1,0 +1,205 @@
+# Past AKTU MCA (Sem II) Data Structures papers, transcribed from the PDFs in pyqs/ (local only).
+# Invertis University does not publish its MCA102 papers, so these AKTU MCA papers are used as the closest
+# match: same subject, same CO-based 3-section pattern, near-identical syllabus.
+# One line per question:  <qno> | <topic ids, comma separated> | <question text>
+# qno: 1a-1j = Section A (short), 2a-2h = Section B, 3a-7b = Section C.
+# @paper <session> | <code> | <max marks> | <main|related> | <exam month> | <source page>
+
+@paper 2024-25 | BMC205 | 70 | main | Jul 2025 | https://aktuquestionpaper.com/mca/computer-applications/sem-2
+1a | u1.intro | Define abstract data type (ADT).
+1b | u1.algo | Mention one key difference between an algorithm and a program.
+1c | u2.recursion | What is tail recursion?
+1d | u5.search | What is the worst-case time complexity of sequential search?
+1e | u5.sortadv | What is the basic idea behind counting sort?
+1f | u4.bintree | Define complete binary tree. Give example.
+1g | u5.sortadv | What is the basic idea behind divide and conquer strategy?
+2a | u1.intro | Define data structure. Describe its need and types.
+2b | u2.stack | What is a Stack? Describe the array and linked list implementation of a stack in C. Compare both in terms of memory usage and flexibility.
+2c | u5.sortsimple | Explain the working of Insertion Sort with an example. What is its time complexity in the best, average, and worst cases?
+2d | u4.traversal | Draw a binary tree with the following traversals: Inorder: D B H E A I F J C G; Preorder: A B D E H C F I J G.
+2e | u6.mst | Define spanning tree. Find the minimal spanning tree for the given graph using Prim's algorithm.
+3a | u1.array | Define array. Explain Row Major Order and Column Major Order representations of a 2-D array with suitable examples.
+3b | u1.algo | Explain the concept of asymptotic notations. Compare and contrast Big O, Theta and Omega notations with appropriate examples for each.
+4a | u2.queue | Explain circular queue. What is the condition if circular queue is full?
+4b | u5.hash | What is hashing? How is it used in search operations? Explain the importance of a good hash function.
+5a | u6.traverse | Explain Depth First Search (DFS) and Breadth First Search (BFS) algorithms with examples. How are they used to identify connected components in a graph?
+5b | u5.sortadv | Describe the Heap Sort algorithm. How is a max-heap constructed, and how does it help in sorting an array?
+6a | u5.bst | Define binary search tree. Create BST for the following data, show all steps: 20, 10, 25, 5, 15, 22, 30, 3, 14, 13.
+6b | u5.btree | What is a B-Tree? Construct a B-tree of order 3 on the following inputs: 10, 20, 30, 40, 50, 60, 70, 80, 90.
+7a | u5.sortadv | Explain the Divide and Conquer strategy with examples. How do Merge Sort and Quick Sort apply this technique, and how do they differ in time complexity and space usage?
+7b | u6.shortest | Explain Dijkstra's algorithm with suitable example.
+
+@paper 2023-24 | KCA205 | 100 | main | Aug 2024 | https://www.notebookpresentation.com/university-paperssyllabus/aktu/mca
+1a | u1.algo | Define algorithm. Give its characteristics.
+1b | u3.dll | What is header linked list?
+1c | u2.recursion | Define recursion.
+1d | u2.deque | What is priority queue?
+1e | u4.traversal | Traverse a given tree in Pre-order traversal.
+1f | u6.graphrep | Define fully connected graph.
+1g | u4.threaded | Define threaded binary tree.
+1h | u6.graphrep | What is weighted graph?
+1i | u5.sortadv | Apply Quick sort algorithm on the string: D, E, L, H, I.
+1j | u6.mst | What is minimum spanning tree (MST)?
+2a | u3.poly | How can polynomials be represented using linked list? Write a function/algorithm to add two polynomials.
+2b | u5.hash | What is hashing? How can we define hash function?
+2c | u5.bst | Define binary search tree. Create a binary search tree by inserting the keys: 9, 2, 3, 4, 5, 6, 8, 1, 7, 0.
+2d | u5.search | What is the divide and conquer problem solving strategy? How does binary search follow this approach?
+2e | old | Given two strings, find the Longest Common Subsequence (LCS): String-1 = ASDFGHJK, String-2 = SHJLU.
+3a | u3.sll | Define linked list. Write a function in C to create a singly linked list.
+3b | u1.matrix,u3.dll | What is sparse matrix? How can it be represented using header linked list?
+4a | u2.stack,u2.expr | Give applications of stack. Write an algorithm to evaluate postfix expression.
+4b | u2.queue | Define linear queue. Write a program or algorithm to implement linear queue.
+5a | u5.avl | Define AVL tree. Demonstrate LL, RR, LR, RL rotations of AVL tree with suitable examples.
+5b | u5.btree | Write the properties of B-Tree. Insert the following keys in a B-Tree of order 3: 98, 76, 54, 32, 12, 34, 56, 78, 95, 48.
+6a | u6.traverse | What is breadth first search (BFS)? Apply BFS on the given graph, taking vertex A as the starting vertex.
+6b | u6.graphrep | Differentiate between Graph and Tree. Give adjacency matrix representation of the given graph.
+7a | u5.sortadv | Write a program in C to implement merge sort. Give its time and space complexity.
+7b | u6.shortest | Find the shortest paths from the source S to all other vertices of the given graph using Dijkstra's algorithm.
+
+@paper 2022-23 | KCA205 | 100 | main | Aug 2023 | https://www.notebookpresentation.com/university-paperssyllabus/aktu/mca
+1a | u1.algo | Describe the Big Oh notation.
+1b | u3.sll | Differentiate between array and linked list.
+1c | u2.recursion | Q(J,K) = 5 if J < K, and Q(J,K) = Q(J−K, K+3) + J if J ≥ K. Find Q(4,7).
+1d | u2.queue | A linear queue holds at most five elements. Front = 2, Rear = 4, Queue: _, L, M, N, _. Show: (i) Add O (ii) Add P (iii) Delete two letters (iv) Add Q, R.
+1e | u5.sortadv | What do you mean by non-comparison sort? List two non-comparison sort algorithms.
+1f | u5.sortsimple | Apply selection sort on 5, 8, 6, 2, 1, 3 to sort in ascending order.
+1g | u5.bst | Discuss inorder successor and inorder predecessor in a Binary Search Tree.
+1h | u4.bintree | Give static and dynamic memory representation of binary tree.
+1i | old | How is the dynamic programming approach better than the recursive approach?
+1j | old | What is the role of a negative cycle while computing the shortest path in a graph?
+2a | u1.array | Discuss how a 2-D array is stored in memory. Arr[50][100] is stored row-major, 4 bytes per element, base address 1000. Find the address of Arr[20][50].
+2b | u2.expr | Write an algorithm to evaluate a postfix expression and evaluate: 10, 7, +, 30, 6, /, 8, −.
+2c | u6.graphrep,u6.traverse | Discuss various methods to represent a graph in memory. Write the DFS algorithm and apply it on the given graph to compute the DFS tree.
+2d | u5.avl | What is AVL tree? What is balancing factor? Explain the balancing of an AVL tree with all possible cases and a suitable example.
+2e | old | How does Strassen's matrix multiplication give better time complexity than classical matrix multiplication? Apply it to [[1,5],[7,3]] and [[8,2],[6,4]].
+3a | u3.sll,u3.dll | How are the following linked lists represented in memory? Give their self-referential structure and diagram: single linear, doubly linear, circular doubly, header linked list.
+3b | u3.sll | Give an algorithm or C function on a singly linked list to (i) insert a node after a given node (ii) delete a node from the end.
+4a | u5.hash | What is hashing? What are the different hashing techniques? Discuss techniques to resolve collisions.
+4b | u2.stack | Write a C program to implement two stacks in a single array, growing from opposite ends: push, pop, overflow and underflow.
+5a | u5.sortadv | Write the heap sort algorithm and draw the max-heap for 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.
+5b | u5.sortadv | Write the Quick Sort algorithm and apply it on 5, 8, 7, 6, 3, 4, 1, 9, 2, 10.
+6a | u5.bst | Write a recursive algorithm to insert a node in a BST and construct the BST for 8, 5, 12, 67, 43, 23, 6, 3, 2, 8, 24, 21, 20.
+6b | u4.traversal | Demonstrate pre-order, post-order and in-order traversal of the given tree. Also write the recursive algorithms of the three traversals.
+7a | u6.shortest | Write the Floyd-Warshall algorithm to compute all-pairs shortest paths and apply it on the given graph.
+7b | old | Discuss applications of the longest common subsequence (LCS). Find the LCS of <1,0,0,1,0,1,0,1> and <0,1,0,1,1,0,1,1,0>.
+
+@paper 2018-19 | RCA202 | 70 | main | 2019 | https://aktuquestionpaper.com/mca/computer-applications/sem-2
+1a | u1.matrix | What is a sparse matrix? Also give its important properties.
+1b | u3.sll | Discuss the differences between array and lists.
+1c | u3.sll | Write two applications of linked lists.
+1d | u6.graphrep | Explain a method to store a graph in computer.
+1e | u4.bintree | Explain complete binary tree and extended binary tree.
+1f | u6.graphrep | Differentiate between directed and undirected graph.
+1g | u5.storage | Explain garbage collection with example.
+2a | u1.algo | What do you understand by complexity of an algorithm? Describe the notations used for the asymptotic running time of an algorithm.
+2b | u3.poly | How can a linked list represent the polynomial 5x³ + 4x² + 3x + 2? Give an algorithm to add two polynomials using linked lists.
+2c | u5.avl | What is AVL tree? Explain the balancing methods of AVL trees with an example.
+2d | u5.search | Compare linear search and binary search with examples and their complexities.
+2e | u6.mst | Describe the minimum cost spanning tree with suitable example.
+3a | u2.expr | Define stack. Convert infix to prefix using a stack: A*(B+D)/E−F*(G+H/K).
+3b | u2.recursion | What is the Tower of Hanoi problem? Explain its solution for 3 disks and 3 pegs.
+4a | u2.queue,u2.deque | Explain circular queue and double ended queue with example.
+4b | u3.sll | Give an algorithm for these singly linked list operations: (i) insert a new node after a given node (ii) delete the last node.
+5a | old | How are records organized into blocks? Discuss any one method with an example.
+5b | u4.threaded | What is threaded binary tree? Explain the operations of threaded binary tree.
+6a | u5.sortsimple | Write the insertion sort algorithm and illustrate it with an example.
+6b | u5.sortadv | Write an algorithm for heap sort and illustrate it with an example.
+7a | u5.hash | Define hashing. What are the properties of a good hash function? Explain four hashing techniques with examples.
+7b | u5.btree,u5.sortsimple | Write a note on (i) B+ tree (ii) internal sorting.
+
+@paper 2018-19 | NMCA213 | 100 | main | 2019 | https://aktuquestionpaper.com/mca/computer-applications/sem-2
+1a | u1.algo | Define asymptotic notations.
+1b | u1.matrix | Define sparse matrix.
+1c | u5.storage | Explain garbage collection and compaction with example.
+1d | u2.recursion | Define recursion. Explain the function of recursion.
+1e | u2.deque | Define priority queue.
+1f | u1.intro | What are the operations performed on data structures?
+1g | u6.graphrep | Explain cycle and Hamiltonian cycle in a graph.
+1h | u4.bintree | Differentiate between binary tree and complete binary tree.
+1i | u6.graphrep | What is a graph? List the various representations of a graph.
+1j | u2.stack | Define PUSH and POP operations in stack.
+2a | u1.intro | What do you mean by data structures? Explain linear and non-linear data structures with example.
+2b | u3.sll | Write an algorithm or C function to reverse a singly linked list.
+2c | u4.huffman | Write a short note on the Huffman algorithm explaining its steps with an example.
+2d | u5.avl | What is AVL tree? Explain the balancing methods of AVL trees with an example.
+2e | u6.mst | Explain Kruskal's algorithm to find the minimum cost spanning tree with an example.
+3a | u1.array | Data[20][50], 4 bytes per element, base address 2000. Find the location of Data[10][10] in (i) row major (ii) column major order.
+3b | u2.expr | Write an algorithm to evaluate a postfix expression using a stack, and evaluate: 6 2 3 + − 3 8 2 / + * 2 3 +.
+4a | u2.queue | Define queue and write the algorithms for insertion and deletion in a queue.
+4b | u3.poly | How can a polynomial be represented through a linked list? Explain how to add two polynomials using linked lists.
+5a | u4.threaded | What is a threaded binary tree? Explain the advantages and disadvantages of using it.
+5b | u5.hash | Define hash function. Explain collision resolution strategies.
+6a | u5.bst | What is a binary search tree? Write a recursive or iterative algorithm to search in a BST.
+6b | u5.sortadv | Write the quick sort algorithm and use it to sort 36, 15, 40, 1, 60, 20, 55, 25, 50, 20.
+7a | u5.btree | Write the differences between B-tree and B+ tree. When would you prefer a B+ tree to a B-tree?
+7b | old | Briefly explain the basic operations on a file. Explain indexed and sequential file organization.
+
+@paper 2017-18 | RCA202 | 70 | main | 2018 | https://aktuquestionpaper.com/mca/computer-applications/sem-2
+1a | u2.recursion | What data structures are used to perform recursion?
+1b | u2.stack | State the difference between stacks and linked lists.
+1c | u2.expr | Translate the infix expression (A−B)/((D+E)*F) into postfix, showing all steps.
+1d | u4.bintree,u4.threaded | Define binary tree, complete binary tree and threaded binary tree.
+1e | u5.sortadv | What is a heap? How does heap sort work?
+1f | u5.hash | Write a short note on indexing and hashing in file structures.
+1g | u5.sortsimple | Write a program for insertion sort. Analyze its running time.
+2a | u2.expr | Write an algorithm to convert an infix expression to postfix.
+2b | u5.search | Write a program for binary search. Analyze its running time.
+2c | u5.sortadv | Write a C program for merge sort and analyze its time complexity.
+2d | u2.queue,u2.stack | Is it possible to implement a queue with the help of two stacks? Explain.
+2e | u5.btree | Define a B-tree. Construct a B-tree of order 3 by inserting M Q A N P W X T G E J into an empty B-tree.
+3a | u1.matrix | Define sparse matrices. How can sparse matrices be represented?
+3b | u2.recursion | Explain recursion. Write a recursive algorithm for the factorial of a number and find its time complexity.
+4a | u2.queue | What is a circular queue? Implement circular queues using arrays with insertion, deletion and display.
+4b | u5.storage | Explain various garbage collection and compaction techniques.
+5a | u4.threaded,u4.traversal | What is a threaded tree structure? Explain different ways to traverse a tree.
+5b | u5.avl | Define AVL tree. Explain the types of rotation done in an AVL tree.
+6a | u5.search | Define searching. Explain linear search and binary search with their complexity.
+6b | u5.sortadv,u5.sortsimple | Write short notes on (1) heap sort and (2) bubble sort, with their comparison and analysis.
+7a | u6.graphrep | What are the different ways a graph is represented in computer memory? Explain with example.
+7b | u6.mst | Explain the minimum spanning tree algorithms with an example.
+
+@paper 2017-18 | NMCA213 | 100 | main | 2018 | https://aktuquestionpaper.com/mca/computer-applications/sem-2
+1a | u1.intro | Compare primitive and non-primitive data structures with example.
+1b | u2.stack,u2.queue | Define stack and queue with proper example.
+1c | u1.matrix | Write an algorithm to transpose a matrix.
+1d | u6.graphrep | Define graph, connected graph and planar graph.
+1e | u1.intro,u3.sll | Define non-linear data structure. List the basic operations carried out in a linked list.
+1f | u2.recursion | Write C code to find the factorial of a number using the iterative method.
+1g | u1.intro | Define some primitive data types.
+1h | u5.avl | Write a short note on balanced binary tree.
+1i | u5.sortsimple | Discuss the space and time complexity of insertion sort.
+1j | u5.sortadv | Write the time complexity of quick sort.
+2a | u1.intro | Define data structure. What is the role of data structures in computer science?
+2b | u2.recursion | Define recursion. When is it good and when bad? Explain with example.
+2c | u2.deque | Define the priority queue data structure. Write algorithms for insertion and deletion.
+2d | u2.stack | What is a stack? What are its applications? Reverse a string with the help of a stack.
+2e | u1.matrix | Write C code to multiply two 3×3 matrices A and B and find its time complexity.
+3a | u5.sortsimple | Illustrate insertion sort on A = <16, 4, 13, 5, 2, 10, 30, 17, 6>.
+3b | u5.sortadv | Write an algorithm to sort n items with merge sort and illustrate it with an example.
+4a | u1.intro | What is a data structure? What factors influence the choice of a data structure? (second part unreadable in the source scan)
+5a | u2.expr | Write an algorithm to convert an infix expression to postfix.
+5b | u2.expr | Convert the infix expression ((8+9)*5+(1*(2+3)*7)+12) into prefix.
+6a | u3.sll | Write a procedure SORT that sorts a linked list without changing the info field of any node.
+6b | u3.sll | A linked list holds numeric values. Design an algorithm to find the maximum value in the list.
+7a | u4.traversal | Define inorder traversal. Write an algorithm or program for inorder traversal.
+7b | u1.matrix | What is a sparse matrix? How can sparse matrices be represented in memory efficiently?
+
+@paper 2016-17 | RCA202 | 70 | main | 2017 | https://aktuquestionpaper.com/mca/computer-applications/sem-2
+1a | u1.intro | Differentiate between primitive and non-primitive data structures with example.
+1b | u1.array | Differentiate between single and multidimensional arrays.
+1c | u4.traversal | Draw the binary tree for the expression a + b / c * d + e + f.
+1d | u2.recursion,u2.stack | What is recursion? In how many ways can stacks be implemented?
+1e | u2.queue,u2.deque | Compare circular queue and deque.
+1f | u1.array | Write an algorithm to insert an element into an array.
+1g | u6.graphrep,u6.traverse | Define graph. List the various graph traversal techniques.
+2a | u6.graphrep | What are the different ways a graph is represented in computer memory? Explain with example.
+2b | u5.hash | Insert the keys 76, 26, 37, 59, 21, 65, 88 into a hash table of size m = 11 using quadratic probing with c1 = 1, c2 = 3 and primary hash h'(k) = k mod m.
+2c | u5.search | Write the recursive binary search algorithm and find its time complexity.
+2d | u5.bst | Write a C function or algorithm to search for an element in a BST.
+2e | u5.search | Compare sequential and binary search. Write an algorithm to find the largest and second largest number of an array.
+2f | u6.shortest | Write Dijkstra's algorithm for the shortest paths from a source vertex.
+2g | u5.sortsimple | Write a program for insertion sort. Analyze its running time.
+2h | u2.recursion | What is recursion? Write a function for the Tower of Hanoi problem.
+3a | u5.sortadv | Illustrate the execution of HEAP-SORT on A = <6, 14, 3, 25, 7, 10, 20, 7, 6>.
+3b | u5.sortadv | Write the quick sort algorithm and sort 65, 70, 75, 80, 85, 60, 55, 40, 45. Find its time and space complexity.
+3c | u6.mst | What is a spanning tree? Find the minimum cost spanning tree of the given graph.

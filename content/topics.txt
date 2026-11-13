@@ -1,0 +1,31 @@
+# Topic ids used to tag past-paper questions (content/pyqs.txt) and answers (content/unit*.md).
+# Units follow the Invertis MCA102 syllabus (2025-27). <id> | <unit> | <name>
+u1.intro | 1 | Data structures & ADT: primitive/non-primitive, linear/non-linear, operations
+u1.algo | 1 | Algorithms: definition, analysis, time & space complexity, asymptotic notations
+u1.array | 1 | Arrays: 1-D and 2-D representation, row/column-major address calculation, operations
+u1.matrix | 1 | Applications of arrays: matrix multiplication, transpose, sparse matrix
+u2.stack | 2 | Stack ADT: push & pop, array and linked implementation, applications
+u2.expr | 2 | Infix, prefix & postfix: conversion and postfix evaluation
+u2.recursion | 2 | Recursion & Tower of Hanoi
+u2.queue | 2 | Queue: operations, circular queue, array and linked implementation
+u2.deque | 2 | Deque & priority queue
+u3.sll | 3 | Singly linked list: array & dynamic implementation, insert, delete, traverse
+u3.dll | 3 | Doubly, circular & header linked lists
+u3.poly | 3 | Polynomial representation & addition, generalized linked list
+u4.bintree | 4 | Tree terminology, binary / complete / extended binary trees, array & linked representation
+u4.traversal | 4 | Traversals (in/pre/post), tree from traversals, expression trees
+u4.threaded | 4 | Threaded binary trees
+u4.huffman | 4 | Huffman algorithm
+u5.search | 5 | Sequential & binary search
+u5.sortsimple | 5 | Insertion, selection & bubble sort
+u5.sortadv | 5 | Quick, merge, heap & radix sort (divide and conquer)
+u5.bst | 5 | Binary search tree: search, insertion, deletion
+u5.avl | 5 | AVL trees & rotations
+u5.btree | 5 | m-way search trees, B-trees & B+ trees
+u5.hash | 5 | Hashing: hash functions & collision resolution
+u5.storage | 5 | Storage management: garbage collection & compaction
+u6.graphrep | 6 | Graph terminology & representation (adjacency matrix, list, multilist)
+u6.traverse | 6 | Graph traversal: BFS, DFS, connected components
+u6.mst | 6 | Spanning trees & MST: Prim and Kruskal
+u6.shortest | 6 | Shortest paths & transitive closure: Dijkstra, Warshall; activity networks
+old | 0 | Not in the MCA102 syllabus (dynamic programming, LCS, Strassen, file organisation)

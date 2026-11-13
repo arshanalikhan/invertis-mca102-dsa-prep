@@ -1,0 +1,19 @@
+# Generated site (built by tools/build_site.py and deployed by GitHub Actions)
+site/
+
+# Downloaded past-paper PDFs and their extracted text: kept locally, not redistributed
+pyqs/
+raw_text/
+
+# Local-only notes for Claude sessions
+HANDOFF.md
+CLAUDE.md
+
+# Editor, OS and tool clutter
+.claude/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+syllabus/
+*.pdf
